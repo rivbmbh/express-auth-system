@@ -1,3 +1,4 @@
+"use strict";
 import { Pool } from "pg";
 import "dotenv/config";
 
