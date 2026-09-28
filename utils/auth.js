@@ -113,8 +113,12 @@ const authenticateToken = (req, res, next) => {
   console.log("token" + token);
 
   try {
-    //memverifikasi token berdasarkan payloadnya dengan generate ulang dan mencocokan siganturenya apakah sama atau tidak
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_CODE); //verify sendiri sudah tau bagian mana payloadnya jadi cukup kirim token lengkapnya (HEADER.PAYLOAD.SIGNATURE)
+    /*
+      memverifikasi token berdasarkan payloadnya dengan generate ulang dan mencocokan siganturenya apakah sama atau tidak
+      json.verify() juga secara otomatis mengecek expiredAt token-nya jadi kita tidak perlu membuat manual lagi,
+      json.verify sendiri sudah tau bagian mana payloadnya jadi cukup kirim token lengkapnya (HEADER.PAYLOAD.SIGNATURE)
+    */
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_CODE);
     console.log("hasil decoded" + decoded.role);
 
     // if (decoded.role !== "admin") {
@@ -133,8 +137,14 @@ const authenticateToken = (req, res, next) => {
     // if (signatureToken === signatureDecoded) {
     //   console.log("Token valid!");
     // }
+
     next();
-  } catch (error) {
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        message: "Token sudah expired!",
+      });
+    }
     return res.status(401).json({
       message: "Token tidak valid!",
     });
