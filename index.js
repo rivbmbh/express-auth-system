@@ -8,6 +8,7 @@ import {
   loginUser,
   findUser,
   authenticateToken,
+  authorizeRole,
 } from "./utils/auth.js";
 import { body, matchedData, query, validationResult } from "express-validator";
 import argon2 from "argon2";
@@ -40,16 +41,21 @@ app.get("/", async (req, res) => {
 //   });
 // });
 
-app.get("/dashboard", authenticateToken, async (req, res) => {
-  try {
-    res.send("Halaman Dashboard (khusus admin)");
-  } catch (err) {
-    console.log("error dashbboard page " + err.message);
-    return res.status(500).json({
-      message: err.message,
-    });
-  }
-});
+app.get(
+  "/dashboard",
+  authenticateToken,
+  authorizeRole("admin"),
+  async (req, res) => {
+    try {
+      res.send("Halaman Dashboard (khusus admin)");
+    } catch (err) {
+      console.log("error dashbboard page " + err.message);
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  },
+);
 
 //login
 app.post(

@@ -101,7 +101,6 @@ const checkEmail = async (email) => {
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  console.log("header:" + authHeader);
 
   if (!authHeader) {
     return res.status(401).json({
@@ -110,7 +109,6 @@ const authenticateToken = (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1];
-  console.log("token" + token);
 
   try {
     /*
@@ -119,11 +117,11 @@ const authenticateToken = (req, res, next) => {
       json.verify sendiri sudah tau bagian mana payloadnya jadi cukup kirim token lengkapnya (HEADER.PAYLOAD.SIGNATURE)
     */
     const decoded = jwt.verify(token, process.env.JWT_SECRET_CODE);
-    console.log("hasil decoded" + decoded.role);
 
     // if (decoded.role !== "admin") {
     //   return res.status(403).json({
-    //     message: "Forbidden",
+    //     message:
+    //       "Halaman ini khusus admin bukan user miskin seperti anda yang jadi bahan gabutnya!",
     //   });
     // }
 
@@ -151,6 +149,30 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
+const authorizeRole = (...allowedRoles) => {
+  /**
+   * allowedRole nanti akan berisi role-role apa saja yang diperbolehkan masuk ke halaman tertentu, jadi AloowedRoles = ["admin"]/["user"]/["admin", "user"] jadi jika keduanya ada berarti kedua role tersebut bisa akses halaman tersebut, jadi pemanggilannya authorizeRole("admin", "admin")
+   */
+  return (req, res, next) => {
+    const user = req.user;
+
+    //cek apakah usr sudah login!
+    if (!user) {
+      return res.status(401).json({
+        message: "Unathorized",
+      });
+    }
+
+    //cek apakh rolenya sesuai
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).json({
+        message: "Forbidden",
+      });
+    }
+    next();
+  };
+};
+
 export {
   loadUsersData,
   registerUser,
@@ -158,4 +180,5 @@ export {
   loginUser,
   findUser,
   authenticateToken,
+  authorizeRole,
 };
