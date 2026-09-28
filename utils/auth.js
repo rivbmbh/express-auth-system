@@ -1,6 +1,8 @@
-import { matchedData, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 import pool from "../database.js";
+import "dotenv/config";
 import argon2 from "argon2";
+import jwt from "jsonwebtoken";
 
 //ambil semua data table user;
 const loadUsersData = async () => {
@@ -8,10 +10,11 @@ const loadUsersData = async () => {
   return result;
 };
 
-const findUserByEmail = async (email) => {
-  const result = await pool.query("SELECT * FROM users WHERE email LIKE $1", [
-    email,
-  ]);
+const findUser = async (column, value) => {
+  const result = await pool.query(
+    `SELECT * FROM users WHERE ${column} LIKE $1`,
+    [value],
+  );
   return result;
 };
 
@@ -23,10 +26,35 @@ const loginUser = async (req, res) => {
     });
   }
   try {
-    const user = req.loginUser;
+    const user = req.loginUser[0];
+    console.log("id" + user.id);
+    console.log("role" + user.role);
+    // const authHeader = req.headers.authorization;
+    // console.log("authHeader:" + authHeader);
+
+    // if (!authHeader) {
+    //   return res.status(401).json({
+    //     message: "Token tidak ditemukan",
+    //   });
+    // }
+
+    /*
+     * sub/subject bisa diisi dengan id user
+     * role juga disesuaikan dari role user saat registrasi atau dari DB
+     */
+    const payload = { sub: user.id, role: user.role };
+    console.log("payload" + payload);
+    const secret = process.env.JWT_SECRET_CODE;
+    const token = jwt.sign(payload, secret, {
+      expiresIn: "15m",
+      algorithm: "HS256", //menentukan algoritma yang dipakai untuk membuat signature
+    });
+    console.log("jwt token:" + token); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
+
     res.json({
       message: "Login berhasil dilakukan",
       user,
+      token,
     });
   } catch (err) {
     console.log("error login: " + err.message);
@@ -71,4 +99,53 @@ const checkEmail = async (email) => {
   return result;
 };
 
-export { loadUsersData, registerUser, checkEmail, loginUser, findUserByEmail };
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  console.log("header:" + authHeader);
+
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Token tidak ditemukan!",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+  console.log("token" + token);
+
+  try {
+    //memverifikasi token berdasarkan payloadnya dengan generate ulang dan mencocokan siganturenya apakah sama atau tidak
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_CODE); //verify sendiri sudah tau bagian mana payloadnya jadi cukup kirim token lengkapnya (HEADER.PAYLOAD.SIGNATURE)
+    console.log("hasil decoded" + decoded.role);
+
+    // if (decoded.role !== "admin") {
+    //   return res.status(403).json({
+    //     message: "Forbidden",
+    //   });
+    // }
+
+    req.user = decoded;
+
+    // const signatureToken = authHeader.split(".")[2];
+    // console.log("token dari request" + signatureToken);
+    // const signatureDecoded = decoded.split(".")[2];
+    // console.log("token dari decoded" + signatureDecoded);
+
+    // if (signatureToken === signatureDecoded) {
+    //   console.log("Token valid!");
+    // }
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Token tidak valid!",
+    });
+  }
+};
+
+export {
+  loadUsersData,
+  registerUser,
+  checkEmail,
+  loginUser,
+  findUser,
+  authenticateToken,
+};

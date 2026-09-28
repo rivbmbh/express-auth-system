@@ -1,12 +1,13 @@
 import express from "express";
 import "dotenv/config";
-import multer from "multer";
+// import multer from "multer";
 import {
   loadUsersData,
   registerUser,
   checkEmail,
   loginUser,
-  findUserByEmail,
+  findUser,
+  authenticateToken,
 } from "./utils/auth.js";
 import { body, matchedData, query, validationResult } from "express-validator";
 import argon2 from "argon2";
@@ -39,6 +40,18 @@ app.get("/", async (req, res) => {
 //   });
 // });
 
+app.get("/dashboard", authenticateToken, async (req, res) => {
+  try {
+    res.send("Halaman Dashboard (khusus admin)");
+  } catch (err) {
+    console.log("error dashbboard page " + err.message);
+    return res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+//login
 app.post(
   "/login",
   [
@@ -46,7 +59,7 @@ app.post(
       .isEmail()
       .withMessage("email tidak valid")
       .custom(async (email, { req }) => {
-        const user = await findUserByEmail(email); //cari apakah user ada di DB
+        const user = await findUser("email", email); //cari apakah user ada di DB
         if (!user.rows) {
           throw new Error("email atau password salah!");
         }
@@ -62,11 +75,6 @@ app.post(
       .custom(async (password, { req }) => {
         const user = req.loginUser;
         console.log(user);
-
-        // const data = await findUserByEmail(email);
-        // const passwordHash = data.rows.password;
-        // console.log(passwordHash);
-
         const passwordFromDB = user[0].password;
         console.log(passwordFromDB);
 
@@ -82,6 +90,7 @@ app.post(
   loginUser,
 );
 
+//regis
 app.post(
   "/register",
   [

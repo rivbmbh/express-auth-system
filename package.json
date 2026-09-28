@@ -13,9 +13,11 @@
   "type": "module",
   "dependencies": {
     "argon2": "^0.45.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
     "multer": "^2.4.0",
     "nodemon": "^3.1.14",
     "pg": "^8.23.0"
