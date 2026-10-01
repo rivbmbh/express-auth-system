@@ -2,7 +2,7 @@ import { validationResult } from "express-validator";
 import pool from "../database.js";
 import "dotenv/config";
 import argon2 from "argon2";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 
 //ambil semua data table user;
 const loadUsersData = async () => {
@@ -11,10 +11,9 @@ const loadUsersData = async () => {
 };
 
 const findUser = async (column, value) => {
-  const result = await pool.query(
-    `SELECT * FROM users WHERE ${column} LIKE $1`,
-    [value],
-  );
+  const result = await pool.query(`SELECT * FROM users WHERE ${column} = $1`, [
+    value,
+  ]);
   return result;
 };
 
@@ -42,19 +41,37 @@ const loginUser = async (req, res) => {
      * sub/subject bisa diisi dengan id user
      * role juga disesuaikan dari role user saat registrasi atau dari DB
      */
-    const payload = { sub: user.id, role: user.role };
+    const payload = {
+      userID: user.id,
+      role: user.role,
+      username: user.username,
+    };
     console.log("payload" + payload);
-    const secret = process.env.JWT_SECRET_CODE;
-    const token = jwt.sign(payload, secret, {
-      expiresIn: "15m",
+
+    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "1m",
       algorithm: "HS256", //menentukan algoritma yang dipakai untuk membuat signature
     });
-    console.log("jwt token:" + token); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
+    console.log("access token:" + accessToken); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
+
+    //payload refresh token hanya userID karna nantinya ketika melakukan refresh sistem akan mencari user berdasarkan id-nya di database agar sumber informasi user valid bukan hanya mengambil payload dari access token lama yang belum tentu valid, karena misalnya role nya sudah berubah atau mungkin usernya sudah dihapus dari database
+    const refreshToken = jwt.sign(
+      {
+        userID: user.id,
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    console.log("refresh token:" + refreshToken);
 
     res.json({
       message: "Login berhasil dilakukan",
       user,
-      token,
+      accessToken,
+      refreshToken,
     });
   } catch (err) {
     console.log("error login: " + err.message);
@@ -108,33 +125,17 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  const token = authHeader.split(" ")[1];
+  const accessToken = authHeader.split(" ")[1];
 
   try {
     /*
-      memverifikasi token berdasarkan payloadnya dengan generate ulang dan mencocokan siganturenya apakah sama atau tidak
-      json.verify() juga secara otomatis mengecek expiredAt token-nya jadi kita tidak perlu membuat manual lagi,
-      json.verify sendiri sudah tau bagian mana payloadnya jadi cukup kirim token lengkapnya (HEADER.PAYLOAD.SIGNATURE)
+      memverifikasi accessToken berdasarkan payloadnya dengan generate ulang dan mencocokan siganturenya apakah sama atau tidak
+      jwt.verify() juga secara otomatis mengecek expiredAt accessToken-nya jadi kita tidak perlu membuat manual lagi,
+      jwt.verify sendiri sudah tau bagian mana payloadnya jadi cukup kirim accessToken lengkapnya (HEADER.PAYLOAD.SIGNATURE)
     */
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_CODE);
-
-    // if (decoded.role !== "admin") {
-    //   return res.status(403).json({
-    //     message:
-    //       "Halaman ini khusus admin bukan user miskin seperti anda yang jadi bahan gabutnya!",
-    //   });
-    // }
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
 
     req.user = decoded;
-
-    // const signatureToken = authHeader.split(".")[2];
-    // console.log("token dari request" + signatureToken);
-    // const signatureDecoded = decoded.split(".")[2];
-    // console.log("token dari decoded" + signatureDecoded);
-
-    // if (signatureToken === signatureDecoded) {
-    //   console.log("Token valid!");
-    // }
 
     next();
   } catch (err) {
@@ -173,6 +174,105 @@ const authorizeRole = (...allowedRoles) => {
   };
 };
 
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  console.log("refreshToken:  " + refreshToken);
+
+  if (!refreshToken) {
+    return res.status(401).json({
+      message: "Refresh token required!",
+    });
+  }
+  const secretRefreshToken = process.env.REFRESH_TOKEN_SECRET;
+  const secretAccessToken = process.env.ACCESS_TOKEN_SECRET;
+  console.log("berikutnya proses pemeriksaan refresh token...");
+
+  // jwt.verify(
+  //   refreshToken,
+  //   secretRefreshToken,
+  //   /**
+  //     1. err/error, jika bagian ini = true berarti refresh token tidak valid atau sudah expired, validasinya mirip seperti access
+  //         token yang mencocokan signaturenya jika valid maka selanjutnya mengecek waktu expirednya.
+  //     2. decoded, nah jika error = false atau refresh token valid maka decoded akan mengembalikan payload dari refresh token,
+  //         cth: {userID: '2'}
+  //    */
+  //   async (err, decoded) => {
+  //     if (err) {
+  //       // if (err.name === "TokenExpiredError") {
+  //       //   return res.status(403).json({
+  //       //     message: "expired refresh token",
+  //       //   });
+  //       // }
+  //       return res.status(403).json({
+  //         message: "Invalid refresh token or expired",
+  //       });
+  //     }
+
+  //     //cari user di database
+  //     console.log("userID" + decoded.userID);
+  //     const user = await findUser("id", decoded.userID);
+  //     // const user = await pool.query("SELECT * FROM users WHERE id = $1", [
+  //     //   decoded.userID,
+  //     // ]);
+  //     console.log("user data " + user.rows[0].username);
+  //     //jika token valid buat access token baru
+  //     const newAccessToken = jwt.sign(
+  //       {
+  //         userID: user.rows[0].id,
+  //         role: user.rows[0].role,
+  //       },
+  //       secretAccessToken,
+  //       {
+  //         expiresIn: "10m",
+  //       },
+  //     );
+  //     console.log("new access token " + newAccessToken);
+  //     res.json({
+  //       accessToken: newAccessToken,
+  //     });
+  //   },
+  // );
+
+  try {
+    const decoded = jwt.verify(refreshToken, secretRefreshToken);
+    console.log("userID " + decoded.userID);
+
+    const user = (await findUser("id", decoded.userID)).rows[0];
+    console.log("user " + user.username);
+
+    if (!user) {
+      throw new Error("user tidak ditemukan");
+    }
+
+    const newAccessToken = jwt.sign(
+      {
+        userID: user.id,
+        role: user.role,
+        username: user.username,
+      },
+      secretAccessToken,
+      {
+        expiresIn: "1h",
+      },
+    );
+
+    console.log(newAccessToken);
+    res.json({
+      message: "success refresh token",
+      accessToken: newAccessToken,
+    });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(403).json({
+        message: "Token sudah expired!",
+      });
+    }
+    return res.status(403).json({
+      message: "Token tidak valid atau sudah expired!",
+    });
+  }
+};
+
 export {
   loadUsersData,
   registerUser,
@@ -181,4 +281,5 @@ export {
   findUser,
   authenticateToken,
   authorizeRole,
+  refreshToken,
 };

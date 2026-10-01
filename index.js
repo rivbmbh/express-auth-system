@@ -9,6 +9,7 @@ import {
   findUser,
   authenticateToken,
   authorizeRole,
+  refreshToken,
 } from "./utils/auth.js";
 import { body, matchedData, query, validationResult } from "express-validator";
 import argon2 from "argon2";
@@ -140,6 +141,9 @@ app.post(
 //   // res.send(result.array());
 //   res.send({ errors: result.array() });
 // });
+
+//refresh token
+app.post("/refresh_token", refreshToken);
 
 app.listen(port, () =>
   console.info(`Server ready on http://localhost:${port}`),
