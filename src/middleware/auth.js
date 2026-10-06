@@ -69,6 +69,7 @@ const refreshToken = async (req, res) => {
       message: "Refresh token required!",
     });
   }
+
   const secretRefreshToken = process.env.REFRESH_TOKEN_SECRET;
   const secretAccessToken = process.env.ACCESS_TOKEN_SECRET;
   console.log("berikutnya proses pemeriksaan refresh token...");

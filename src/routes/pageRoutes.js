@@ -16,8 +16,12 @@ import { body } from "express-validator";
 
 const router = Router();
 
-router.get("/home", (req, res) => {
-  res.send("Hello Bitch!");
+router.get("/", (req, res) => {
+  const data = {
+    title: "Home Page",
+    page: "",
+  };
+  res.render("main", data);
 });
 
 //regis
@@ -95,5 +99,12 @@ router.post(
 
 router.post("/refresh_token", refreshToken);
 router.get("/dashboard", authenticateToken, authorizeRole("admin"), dashboard);
+router.get("/login", (req, res) => {
+  const data = {
+    title: "Login Page",
+    page: "login",
+  };
+  res.render("main", data);
+});
 
 export default router;
