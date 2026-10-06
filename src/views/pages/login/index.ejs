@@ -1,1 +1,253 @@
-<h1>Login Page</h1>
+<div class="w-full max-w-md mx-auto py-6">
+  
+  <!-- Login Glass Card -->
+  <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden border border-slate-800">
+    
+    <!-- Glow Overlay -->
+    <div class="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Header & Title -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 mb-3 shadow-inner">
+        <i data-lucide="log-in" class="w-6 h-6"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Selamat Datang Kembali</h2>
+      <p class="text-sm text-slate-400 mt-1">Masukkan kredensial Anda untuk mengakses akun</p>
+    </div>
+
+    <!-- Global Server Error Alert (if present) -->
+    <% 
+      let globalError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => !e.path || e.path === 'general') : null;
+      let emailError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'email') : null;
+      let passwordError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'password') : null;
+    %>
+
+    <div id="general-alert" class="<%= globalError ? 'flex' : 'hidden' %> items-start gap-3 p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm animate-fade-in">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400 shrink-0 mt-0.5"></i>
+      <div>
+        <p class="font-semibold text-rose-200">Gagal Masuk</p>
+        <p id="general-alert-msg" class="text-xs text-rose-300/90 mt-0.5"><%= globalError ? globalError.msg : 'Email atau password yang Anda masukkan tidak sesuai.' %></p>
+      </div>
+    </div>
+
+    <!-- Interactive Error UI Toggle (For Testing / Demo UI) -->
+    <div class="mb-6 p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+      <span class="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+        <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-indigo-400"></i>
+        Simulasi Error UI
+      </span>
+      <button type="button" id="toggle-demo-error" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-medium transition-colors">
+        Tampilkan Error State
+      </button>
+    </div>
+
+    <!-- Form Login -->
+    <form action="/login" method="POST" id="login-form" class="space-y-5" novalidate>
+      
+      <!-- Input Email -->
+      <div>
+        <label for="email" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+          Alamat Email
+        </label>
+        <div class="relative rounded-xl shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400" id="email-icon">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+          </div>
+          <input 
+            type="email" 
+            name="email" 
+            id="email" 
+            placeholder="nama@email.com"
+            value="<%= typeof oldInput !== 'undefined' && oldInput.email ? oldInput.email : '' %>"
+            class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/90 border text-sm text-white placeholder-slate-500 focus:outline-none transition-all duration-200 <%= emailError ? 'border-rose-500 focus:border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20' %>"
+          />
+          <div id="email-error-icon" class="<%= emailError ? 'flex' : 'hidden' %> absolute inset-y-0 right-0 pr-3.5 items-center pointer-events-none text-rose-500">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        
+        <!-- Error Message Helper UI -->
+        <p id="email-error-text" class="<%= emailError ? 'flex' : 'hidden' %> items-center gap-1.5 text-xs text-rose-400 font-medium mt-1.5 animate-shake">
+          <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
+          <span><%= emailError ? emailError.msg : 'Format email tidak valid atau wajib diisi.' %></span>
+        </p>
+      </div>
+
+      <!-- Input Password -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            Kata Sandi
+          </label>
+          <a href="#" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+            Lupa kata sandi?
+          </a>
+        </div>
+        <div class="relative rounded-xl shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400" id="password-icon">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </div>
+          <input 
+            type="password" 
+            name="password" 
+            id="password" 
+            placeholder="••••••••"
+            class="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-900/90 border text-sm text-white placeholder-slate-500 focus:outline-none transition-all duration-200 <%= passwordError ? 'border-rose-500 focus:border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20' %>"
+          />
+          <button 
+            type="button" 
+            id="toggle-password" 
+            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors focus:outline-none"
+            aria-label="Toggle password visibility"
+          >
+            <i data-lucide="eye" id="eye-icon" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Error Message Helper UI -->
+        <p id="password-error-text" class="<%= passwordError ? 'flex' : 'hidden' %> items-center gap-1.5 text-xs text-rose-400 font-medium mt-1.5 animate-shake">
+          <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
+          <span><%= passwordError ? passwordError.msg : 'Kata sandi minimal 8 karakter dan wajib diisi.' %></span>
+        </p>
+      </div>
+
+      <!-- Remember Me Checkbox -->
+      <div class="flex items-center justify-between pt-1">
+        <label class="flex items-center gap-2.5 cursor-pointer group">
+          <input 
+            type="checkbox" 
+            name="remember" 
+            class="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900"
+          />
+          <span class="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">Ingat saya di perangkat ini</span>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        id="submit-btn"
+        class="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-sm transition-all duration-200 shadow-xl shadow-indigo-600/25 hover:shadow-indigo-600/40 flex items-center justify-center gap-2 group"
+      >
+        <span>Masuk ke Akun</span>
+        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>
+      </button>
+
+    </form>
+
+    <!-- Footer Register Link -->
+    <div class="mt-8 pt-6 border-t border-slate-800/80 text-center">
+      <p class="text-xs text-slate-400">
+        Belum memiliki akun? 
+        <a href="/register" class="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1">
+          Daftar sekarang
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Client-side Interactive Logic -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Password toggle
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    if (togglePasswordBtn && passwordInput) {
+      togglePasswordBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        if (eyeIcon) {
+          eyeIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      });
+    }
+
+    // Demo Error Toggle state
+    const demoBtn = document.getElementById('toggle-demo-error');
+    const emailInput = document.getElementById('email');
+    const emailErrIcon = document.getElementById('email-error-icon');
+    const emailErrText = document.getElementById('email-error-text');
+    const passwordErrText = document.getElementById('password-error-text');
+    const generalAlert = document.getElementById('general-alert');
+
+    let isDemoErrorActive = false;
+
+    if (demoBtn) {
+      demoBtn.addEventListener('click', () => {
+        isDemoErrorActive = !isDemoErrorActive;
+        
+        if (isDemoErrorActive) {
+          demoBtn.textContent = 'Sembunyikan Error State';
+          demoBtn.classList.replace('bg-indigo-600/20', 'bg-rose-600/20');
+          demoBtn.classList.replace('text-indigo-300', 'text-rose-300');
+          
+          // Apply Error Styling to Email
+          emailInput.classList.remove('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
+          emailInput.classList.add('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
+          if (emailErrIcon) emailErrIcon.classList.remove('hidden');
+          if (emailErrText) emailErrText.classList.remove('hidden');
+          
+          // Apply Error Styling to Password
+          passwordInput.classList.remove('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
+          passwordInput.classList.add('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
+          if (passwordErrText) passwordErrText.classList.remove('hidden');
+
+          // Show Alert
+          if (generalAlert) generalAlert.classList.remove('hidden');
+        } else {
+          demoBtn.textContent = 'Tampilkan Error State';
+          demoBtn.classList.replace('bg-rose-600/20', 'bg-indigo-600/20');
+          demoBtn.classList.replace('text-rose-300', 'text-indigo-300');
+
+          // Remove Error Styling
+          emailInput.classList.remove('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
+          emailInput.classList.add('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
+          if (emailErrIcon) emailErrIcon.classList.add('hidden');
+          if (emailErrText) emailErrText.classList.add('hidden');
+
+          passwordInput.classList.remove('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
+          passwordInput.classList.add('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
+          if (passwordErrText) passwordErrText.classList.add('hidden');
+
+          // Hide Alert
+          if (generalAlert && !<%= globalError ? 'true' : 'false' %>) generalAlert.classList.add('hidden');
+        }
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+    }
+
+    // Client side quick validation on form submit
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', (e) => {
+        let hasError = false;
+        
+        if (!emailInput.value.trim() || !emailInput.value.includes('@')) {
+          emailInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+          if (emailErrText) emailErrText.classList.remove('hidden');
+          if (emailErrIcon) emailErrIcon.classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (!passwordInput.value || passwordInput.value.length < 8) {
+          passwordInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+          if (passwordErrText) passwordErrText.classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (hasError && !isDemoErrorActive) {
+          // Re-trigger icon updates
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      });
+    }
+  });
+</script>

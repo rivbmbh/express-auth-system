@@ -1,1 +1,67 @@
-<h1>Home Page</h1>
+<div class="w-full max-w-4xl mx-auto py-8">
+  <!-- Hero Glass Container -->
+  <div class="glass-card rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl">
+    
+    <!-- Background Ambient Glow -->
+    <div class="absolute -top-24 -left-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-6">
+      <i data-lucide="sparkles" class="w-4 h-4"></i>
+      <span>Sistem Autentikasi Kustom</span>
+    </div>
+
+    <!-- Headline -->
+    <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-2xl mx-auto">
+      Keamanan & Akses Terkontrol Untuk Platform Anda
+    </h1>
+
+    <p class="mt-4 text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+      Sistem otentikasi siap pakai dengan enkripsi Argon2, JSON Web Token (JWT), validasi input ketat, dan antarmuka Tailwind CSS v4 yang modern.
+    </p>
+
+    <!-- Action Buttons -->
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="/login" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all duration-200 shadow-xl shadow-indigo-600/25 hover:shadow-indigo-600/40 hover:-translate-y-0.5 gap-2.5">
+        <i data-lucide="log-in" class="w-4 h-4"></i>
+        <span>Masuk ke Akun</span>
+      </a>
+      
+      <a href="/register" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold text-sm border border-slate-700/60 transition-all duration-200 hover:-translate-y-0.5 gap-2.5">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        <span>Buat Akun Baru</span>
+      </a>
+    </div>
+
+    <!-- Feature Cards Grid -->
+    <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+      
+      <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-colors">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white mb-1">Hashing Enkripsi</h3>
+        <p class="text-xs text-slate-400">Proteksi kata sandi dengan algoritma keamanan Argon2 hashing terbaru.</p>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-colors">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3">
+          <i data-lucide="key-round" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white mb-1">JWT Tokens</h3>
+        <p class="text-xs text-slate-400">Dukungan Access Token dan Refresh Token otomatis untuk sesi aman.</p>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-colors">
+        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-3">
+          <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white mb-1">UI Input Error</h3>
+        <p class="text-xs text-slate-400">Validasi input dengan umpan balik visual error yang responsif dan jelas.</p>
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<% 
+  const currentPage = typeof page !== 'undefined' ? page : ''; 
+%>
+<header class="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <span class="font-bold text-lg tracking-tight text-white group-hover:text-indigo-400 transition-colors">
+          Auth<span class="text-indigo-500">Platform</span>
+        </span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-full border border-slate-800">
+        <a href="/" class="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 <%= currentPage === '' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' %>">
+          Beranda
+        </a>
+        <a href="/login" class="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 <%= currentPage === 'login' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' %>">
+          Masuk
+        </a>
+        <a href="/register" class="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 <%= currentPage === 'register' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' %>">
+          Daftar
+        </a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="hidden md:flex items-center gap-3">
+        <% if (currentPage === 'login') { %>
+          <a href="/register" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl transition-all shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>Daftar Akun</span>
+          </a>
+        <% } else if (currentPage === 'register') { %>
+          <a href="/login" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700/60 transition-all gap-2">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Masuk Akun</span>
+          </a>
+        <% } else { %>
+          <a href="/login" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800 transition-all gap-2">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Masuk</span>
+          </a>
+          <a href="/register" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl transition-all shadow-lg shadow-indigo-600/20 gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>Daftar</span>
+          </a>
+        <% } %>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-toggle" type="button" class="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-b border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-2 pb-4 space-y-2">
+    <a href="/" class="block px-3 py-2 rounded-lg text-base font-medium <%= currentPage === '' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800' %>">
+      Beranda
+    </a>
+    <a href="/login" class="block px-3 py-2 rounded-lg text-base font-medium <%= currentPage === 'login' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800' %>">
+      Masuk
+    </a>
+    <a href="/register" class="block px-3 py-2 rounded-lg text-base font-medium <%= currentPage === 'register' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800' %>">
+      Daftar
+    </a>
+  </div>
+</header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (toggleBtn && mobileMenu) {
+      toggleBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+  });
+</script>

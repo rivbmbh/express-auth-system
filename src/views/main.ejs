@@ -1,3 +1,26 @@
-<main>
-  <%- include( !page ? './pages/home' : './pages/' + page + '/index' ); %>
-</main>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <%- include('./partials/header') %>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header Partial -->
+  <%- include('./partials/navbar') %>
+
+  <!-- Main Content Body -->
+  <main class="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <%- include( !page ? './pages/home' : './pages/' + page + '/index' ); %>
+  </main>
+
+  <!-- Footer Partial -->
+  <%- include('./partials/footer') %>
+
+  <!-- Initialize Lucide Icons -->
+  <script>
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

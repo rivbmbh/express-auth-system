@@ -1,0 +1,31 @@
+<footer class="w-full border-t border-slate-800/80 bg-slate-950/60 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+      
+      <!-- Left side: Brand info -->
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+        </div>
+        <p class="text-xs text-slate-400">
+          &copy; <%= new Date().getFullYear() %> <span class="text-slate-200 font-semibold">Custom Auth Platform</span>. Hak cipta dilindungi undang-undang.
+        </p>
+      </div>
+
+      <!-- Center: System Status Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Sistem Autentikasi Aktif</span>
+      </div>
+
+      <!-- Right side: Quick Links -->
+      <div class="flex items-center gap-6 text-xs text-slate-400">
+        <a href="/" class="hover:text-white transition-colors">Beranda</a>
+        <a href="/login" class="hover:text-white transition-colors">Masuk</a>
+        <a href="/register" class="hover:text-white transition-colors">Daftar</a>
+        <a href="#" class="hover:text-white transition-colors">Privasi</a>
+      </div>
+
+    </div>
+  </div>
+</footer>

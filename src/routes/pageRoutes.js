@@ -107,4 +107,12 @@ router.get("/login", (req, res) => {
   res.render("main", data);
 });
 
+router.get("/register", (req, res) => {
+  const data = {
+    title: "Register Page",
+    page: "register",
+  };
+  res.render("main", data);
+});
+
 export default router;
