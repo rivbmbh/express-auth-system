@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename);
 // const upload = multer(); //untuk menerima data dari form-data / multipart form data (biasanya untuk input file/gambar)
 app.use(express.json()); //ini = menerima data json dari request || application/json / bodyParser
 app.use(express.urlencoded({ extended: true })); // ini untuk menerima data HTML dari form-data
+app.use(express.static(path.join(__dirname, "src", "public"))); // serve static assets from src/public
 app.set("view engine", "ejs"); //ini untuk menggunakan template engine ejs
 app.set("views", path.join(__dirname, "src", "views")); //ini untuk menentukan folder views yang akan digunakan untuk menaruh file ejs
 const port = process.env.HTTP_PORT; //port yang diambil dari file .env

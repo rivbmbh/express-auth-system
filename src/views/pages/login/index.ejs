@@ -20,9 +20,10 @@
       let globalError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => !e.path || e.path === 'general') : null;
       let emailError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'email') : null;
       let passwordError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'password') : null;
+      let hasGlobalError = Boolean(globalError);
     %>
 
-    <div id="general-alert" class="<%= globalError ? 'flex' : 'hidden' %> items-start gap-3 p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm animate-fade-in">
+    <div id="general-alert" data-server-error="<%= hasGlobalError ? 'true' : 'false' %>" class="<%= hasGlobalError ? 'flex' : 'hidden' %> items-start gap-3 p-4 mb-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm animate-fade-in">
       <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400 shrink-0 mt-0.5"></i>
       <div>
         <p class="font-semibold text-rose-200">Gagal Masuk</p>
@@ -150,104 +151,5 @@
 
 </div>
 
-<!-- Client-side Interactive Logic -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Password toggle
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const passwordInput = document.getElementById('password');
-    const eyeIcon = document.getElementById('eye-icon');
-
-    if (togglePasswordBtn && passwordInput) {
-      togglePasswordBtn.addEventListener('click', () => {
-        const isPassword = passwordInput.getAttribute('type') === 'password';
-        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-        if (eyeIcon) {
-          eyeIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-      });
-    }
-
-    // Demo Error Toggle state
-    const demoBtn = document.getElementById('toggle-demo-error');
-    const emailInput = document.getElementById('email');
-    const emailErrIcon = document.getElementById('email-error-icon');
-    const emailErrText = document.getElementById('email-error-text');
-    const passwordErrText = document.getElementById('password-error-text');
-    const generalAlert = document.getElementById('general-alert');
-
-    let isDemoErrorActive = false;
-
-    if (demoBtn) {
-      demoBtn.addEventListener('click', () => {
-        isDemoErrorActive = !isDemoErrorActive;
-        
-        if (isDemoErrorActive) {
-          demoBtn.textContent = 'Sembunyikan Error State';
-          demoBtn.classList.replace('bg-indigo-600/20', 'bg-rose-600/20');
-          demoBtn.classList.replace('text-indigo-300', 'text-rose-300');
-          
-          // Apply Error Styling to Email
-          emailInput.classList.remove('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
-          emailInput.classList.add('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
-          if (emailErrIcon) emailErrIcon.classList.remove('hidden');
-          if (emailErrText) emailErrText.classList.remove('hidden');
-          
-          // Apply Error Styling to Password
-          passwordInput.classList.remove('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
-          passwordInput.classList.add('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
-          if (passwordErrText) passwordErrText.classList.remove('hidden');
-
-          // Show Alert
-          if (generalAlert) generalAlert.classList.remove('hidden');
-        } else {
-          demoBtn.textContent = 'Tampilkan Error State';
-          demoBtn.classList.replace('bg-rose-600/20', 'bg-indigo-600/20');
-          demoBtn.classList.replace('text-rose-300', 'text-indigo-300');
-
-          // Remove Error Styling
-          emailInput.classList.remove('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
-          emailInput.classList.add('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
-          if (emailErrIcon) emailErrIcon.classList.add('hidden');
-          if (emailErrText) emailErrText.classList.add('hidden');
-
-          passwordInput.classList.remove('border-rose-500', 'focus:border-rose-500', 'ring-2', 'ring-rose-500/20');
-          passwordInput.classList.add('border-slate-700/80', 'focus:border-indigo-500', 'focus:ring-indigo-500/20');
-          if (passwordErrText) passwordErrText.classList.add('hidden');
-
-          // Hide Alert
-          if (generalAlert && !<%= globalError ? 'true' : 'false' %>) generalAlert.classList.add('hidden');
-        }
-
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      });
-    }
-
-    // Client side quick validation on form submit
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', (e) => {
-        let hasError = false;
-        
-        if (!emailInput.value.trim() || !emailInput.value.includes('@')) {
-          emailInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
-          if (emailErrText) emailErrText.classList.remove('hidden');
-          if (emailErrIcon) emailErrIcon.classList.remove('hidden');
-          hasError = true;
-        }
-
-        if (!passwordInput.value || passwordInput.value.length < 8) {
-          passwordInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
-          if (passwordErrText) passwordErrText.classList.remove('hidden');
-          hasError = true;
-        }
-
-        if (hasError && !isDemoErrorActive) {
-          // Re-trigger icon updates
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-      });
-    }
-  });
-</script>
+<!-- External Modular Script for Login Page -->
+<script src="/js/login.js" defer></script>
