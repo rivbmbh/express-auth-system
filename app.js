@@ -9,6 +9,19 @@ const app = express(); //framework express
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Middleware untuk mengatur CORS
+//ini tidak pengaruh jika back end dan frontend berada di domain yang sama, tapi jika beda domain maka harus diaktifkan, jadi coba buat file project terpisah dan jalankan di port yang berbeda, misal backend di port 3000 dan frontend di port 3001, maka harus diaktifkan middleware ini agar bisa saling berkomunikasi.
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://authplatform.id"); // Ganti dengan domain frontend Anda
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); // Mengirimkan respons kosong untuk permintaan OPTIONS
+  }
+  next();
+});
+
 /**
  * Middleware 3 baris kode di bawah ini
  */
