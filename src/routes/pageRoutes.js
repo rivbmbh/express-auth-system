@@ -28,32 +28,43 @@ router.get("/", (req, res) => {
 router.post(
   "/register",
   [
-    body("username").isLength({ min: 3 }),
+    body("username")
+      .trim()
+      .notEmpty()
+      .withMessage("username wajib diisi!")
+      .bail()
+      .isLength({ min: 3 })
+      .withMessage("username minimal 3 karakter!"),
     body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("email wajib diisi!")
+      .bail()
+      .isEmail()
+      .withMessage("email tidak valid!")
+      .bail()
       .custom(async (value) => {
-        const result = await checkEmail(value);
-        console.log("hasil cek email" + result);
+        const exitingEmail = await checkEmail(value);
+        console.log("hasil cek email" + exitingEmail);
 
-        if (result.rows.length > 0) {
-          throw new Error("Email sudah terdaftar!, masukan email yang berbeda");
+        if (exitingEmail.rows.length > 0) {
+          throw new Error("Email sudah terdaftar!");
         }
         return true;
-      })
-      // .trim()
-      .isEmail(),
-    body("password").isLength({ min: 8 }),
-    body("passwordConfirmation")
+      }),
+    body("password")
       .isLength({ min: 8 })
-      .withMessage("Password minimal 8 karakter dek!")
+      .withMessage("Password minimal 8 karakter dek!"),
+    body("passwordConfirmation")
+      .notEmpty()
+      .withMessage("Password confirmation wajib diisi!")
+      .bail()
       .custom((value, { req }) => {
-        const password = req.body.password;
-        // if (!value === password) {
-        //   throw new Error("konfirmasi password tidak sama dengan password!");
-        // }
-        // return true;
-        return value === password;
-      })
-      .withMessage("Password confirmation tidak cocok!"),
+        if (value !== req.body.password) {
+          throw new Error("Password confirmation tidak cocok!");
+        }
+        return true;
+      }),
   ],
   register,
 );

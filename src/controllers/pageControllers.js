@@ -89,13 +89,21 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   const body = req.body;
   const errors = validationResult(req);
-  if (!errors.isEmpty) {
+
+  if (!errors.isEmpty()) {
+    const formattedErrors = {};
+    for (const error of errors.array()) {
+      formattedErrors[error.path] = error.msg;
+    }
     return res.status(422).json({
-      errors: errors.array(),
+      message: "Validasi input gagal",
+      errors: formattedErrors,
     });
   }
+
   try {
     const username = body.username;
+    console.log(username);
     const email = body.email;
     const password = await argon2.hash(body.password);
     console.log(password);
@@ -105,11 +113,15 @@ const register = async (req, res) => {
       [username, email, password],
     );
     console.log("user ditambahkan!");
-    res.send("berhasil registrasi!");
+    return res.status(200).json({
+      success: true,
+      message: "Registrasi berhasil dilakukan",
+      redirectTo: "/login",
+    });
   } catch (err) {
     console.log("error regis" + err.message);
     return res.status(500).json({
-      message: "Terjadi kesalahan pada server",
+      message: "Terjadi kesalahan pada server" + err.message,
     });
   }
 };

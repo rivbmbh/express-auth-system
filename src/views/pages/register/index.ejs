@@ -24,13 +24,15 @@
     </div>
 
     <!-- Express Validator Errors Handling -->
-    <% 
-      let usernameError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'username') : null;
-      let emailError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'email') : null;
-      let passwordError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'password') : null;
-      let confirmError = typeof errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path === 'passwordConfirmation') : null;
-      let hasAnyError = Boolean(usernameError || emailError || passwordError || confirmError);
-    %>
+    <% let usernameError = typeof errors !== 'undefined' &&
+    Array.isArray(errors) ? errors.find(e => e.path === 'username') : null; let
+    emailError = typeof errors !== 'undefined' && Array.isArray(errors) ?
+    errors.find(e => e.path === 'email') : null; let passwordError = typeof
+    errors !== 'undefined' && Array.isArray(errors) ? errors.find(e => e.path
+    === 'password') : null; let confirmError = typeof errors !== 'undefined' &&
+    Array.isArray(errors) ? errors.find(e => e.path === 'passwordConfirmation')
+    : null; let hasAnyError = Boolean(usernameError || emailError ||
+    passwordError || confirmError); %>
 
     <!-- Global Alert Banner -->
     <div
@@ -51,7 +53,7 @@
     </div>
 
     <!-- Interactive Error UI Toggle (For Testing / Demo UI) -->
-    <div
+    <!-- <div
       class="mb-6 p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between"
     >
       <span
@@ -67,7 +69,7 @@
       >
         Tampilkan Error State
       </button>
-    </div>
+    </div> -->
 
     <!-- Form Register -->
     <form
@@ -113,7 +115,7 @@
           class="<%= usernameError ? 'flex' : 'hidden' %> items-center gap-1.5 text-xs text-rose-400 font-medium mt-1.5"
         >
           <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
-          <span><%= usernameError ? usernameError.msg : 'Username minimal 3 karakter.' %></span>
+          <span></span>
         </p>
       </div>
 
@@ -153,7 +155,7 @@
           class="<%= emailError ? 'flex' : 'hidden' %> items-center gap-1.5 text-xs text-rose-400 font-medium mt-1.5"
         >
           <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
-          <span><%= emailError ? emailError.msg : 'Email tidak valid atau sudah terdaftar.' %></span>
+          <span></span>
         </p>
       </div>
 
@@ -193,7 +195,7 @@
           class="<%= passwordError ? 'flex' : 'hidden' %> items-center gap-1.5 text-xs text-rose-400 font-medium mt-1.5"
         >
           <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
-          <span><%= passwordError ? passwordError.msg : 'Password minimal 8 karakter.' %></span>
+          <span></span>
         </p>
       </div>
 
@@ -229,11 +231,11 @@
 
         <!-- Error UI Helper -->
         <p
-          id="confirm-error-text"
+          id="passwordConfirmation-error-text"
           class="<%= confirmError ? 'flex' : 'hidden' %> items-center gap-1.5 text-xs text-rose-400 font-medium mt-1.5"
         >
           <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
-          <span><%= confirmError ? confirmError.msg : 'Konfirmasi password tidak cocok!' %></span>
+          <span></span>
         </p>
       </div>
 
