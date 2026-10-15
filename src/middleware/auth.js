@@ -3,15 +3,17 @@ import jwt from "jsonwebtoken";
 import { findManyUser } from "../controllers/pageControllers.js";
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  // const authHeader = req.headers.authorization;
+  const accessToken = req.cookies.accessToken;
+  console.log("access token dari cookie " + accessToken);
 
-  if (!authHeader) {
+  if (!accessToken) {
     return res.status(401).json({
       message: "Token tidak ditemukan!",
     });
   }
 
-  const accessToken = authHeader.split(" ")[1];
+  // const accessToken = token.split(" ")[1];
 
   try {
     /*

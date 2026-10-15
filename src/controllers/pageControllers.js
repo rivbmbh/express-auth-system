@@ -25,10 +25,19 @@ const findManyUser = async (column, value) => {
 const login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("error validasi input login");
+    const formattedErrors = {};
+    for (const error of errors.array()) {
+      console.log(error.path);
+      formattedErrors[error.path] = error.msg;
+    }
+    console.log(formattedErrors);
     return res.status(422).json({
-      errors: errors.array(),
+      message: "Validasi input gagal",
+      errors: formattedErrors,
     });
   }
+
   try {
     const user = req.loginUser[0];
     console.log("id" + user.id);
@@ -54,7 +63,7 @@ const login = async (req, res) => {
     console.log("payload" + payload);
 
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "1m",
+      expiresIn: "15m",
       algorithm: "HS256", //menentukan algoritma yang dipakai untuk membuat signature
     });
     console.log("access token:" + accessToken); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
@@ -72,11 +81,29 @@ const login = async (req, res) => {
 
     console.log("refresh token:" + refreshToken);
 
-    res.json({
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true, //mencegah js DOM mengambil cookie dari document.cookie
+      secure: process.env.NODE_ENV === "production", //jika true pakai https sebaliknya http
+      samSite: "lax",
+      maxAge: 15 * 60 * 100,
+      path: "/",
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      samSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 100,
+      path: "/refresh_token",
+    });
+
+    res.status(200).json({
+      success: true,
       message: "Login berhasil dilakukan",
       user,
       accessToken,
       refreshToken,
+      redirectTo: "/dashboard",
     });
   } catch (err) {
     console.log("error login: " + err.message);

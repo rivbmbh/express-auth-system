@@ -3,6 +3,8 @@ import "dotenv/config";
 import pageRoutes from "./src/routes/pageRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import cookieParser from "cookie-parser";
+
 // import multer from "multer";
 
 const app = express(); //framework express
@@ -27,6 +29,7 @@ app.use((req, res, next) => {
  */
 // const upload = multer(); //untuk menerima data dari form-data / multipart form data (biasanya untuk input file/gambar)
 app.use(express.json()); //ini = menerima data json dari request || application/json / bodyParser
+app.use(cookieParser()); // memungkinkan kamu membaca cookie yang dikrim browser melalui req.cookies
 app.use(express.urlencoded({ extended: true })); // ini untuk menerima data HTML dari form-data
 app.use(express.static(path.join(__dirname, "src", "public"))); // serve static assets from src/public
 app.set("view engine", "ejs"); //ini untuk menggunakan template engine ejs

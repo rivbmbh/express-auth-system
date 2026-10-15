@@ -74,30 +74,41 @@ router.post(
   "/login",
   [
     body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("email tidak boleh kosong!")
+      .bail()
       .isEmail()
       .withMessage("email tidak valid")
+      .bail()
       .custom(async (email, { req }) => {
-        const user = await findManyUser("email", email); //cari apakah user ada di DB
-        if (!user.rows) {
-          throw new Error("email atau password salah!");
+        const user = await findManyUser("email", email);
+        if (!user.rows.length > 0) {
+          throw new Error("email belum terdaftar");
         }
         req.loginUser = user.rows; //teruskan ke validasi input berikutnya melalui req body
         console.log("akun anda terdaftar" + user.rows);
         return true;
       }),
+    // .bail(),
     body("password")
       .notEmpty()
-      .withMessage("password wajib di isi")
+      .withMessage("password tidak boleh kosong")
+      .bail()
       .isLength({ min: 8 })
       .withMessage("password minimal 8 karakter!")
+      .bail()
       .custom(async (password, { req }) => {
         const user = req.loginUser;
         console.log(user);
+        if (!user) {
+          throw new Error("Password salah!");
+        }
         const passwordFromDB = user[0].password;
-        console.log(passwordFromDB);
-
+        console.log("pass DB " + passwordFromDB);
+        console.log(password);
         const isValid = await argon2.verify(passwordFromDB, password);
-        console.log(isValid);
+        console.log("password valid?" + isValid);
 
         if (!isValid) {
           throw new Error("password yang anda masukan salah!");
