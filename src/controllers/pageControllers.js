@@ -63,7 +63,7 @@ const login = async (req, res) => {
     console.log("payload" + payload);
 
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "15m",
+      expiresIn: "1m",
       algorithm: "HS256", //menentukan algoritma yang dipakai untuk membuat signature
     });
     console.log("access token:" + accessToken); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
@@ -75,34 +75,33 @@ const login = async (req, res) => {
       },
       process.env.REFRESH_TOKEN_SECRET,
       {
-        expiresIn: "7d",
+        expiresIn: "1d",
       },
     );
 
     console.log("refresh token:" + refreshToken);
 
+    //set cookie
     res.cookie("accessToken", accessToken, {
       httpOnly: true, //mencegah js DOM mengambil cookie dari document.cookie
       secure: process.env.NODE_ENV === "production", //jika true pakai https sebaliknya http
       samSite: "lax",
-      maxAge: 15 * 60 * 100,
-      path: "/",
+      maxAge: 1 * 60 * 1000, //1 * 60 * 1000, angka 1 di awal sebagai acuan atau = 1 menit
+      path: "/", //bisa diakses di endpoint apapun
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       samSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 100,
-      path: "/refresh_token",
+      maxAge: 1 * 24 * 60 * 60 * 1000, //1hari * 24jam * 60menit * 60detik * 1000milidetik / dikonversi ke milidetik
+      path: "/refresh-token", //hanya bisa diakses dienpoint ini
     });
 
     res.status(200).json({
       success: true,
       message: "Login berhasil dilakukan",
       user,
-      accessToken,
-      refreshToken,
       redirectTo: "/dashboard",
     });
   } catch (err) {

@@ -119,7 +119,14 @@ router.post(
   login,
 );
 
-router.post("/refresh_token", refreshToken);
+router.post("/refresh-token", refreshToken);
+router.get("/refresh-token", (req, res) => {
+  const data = {
+    title: "Refresh Token",
+    page: "refresh",
+  };
+  res.render("main", data);
+});
 router.get("/dashboard", authenticateToken, authorizeRole("admin"), dashboard);
 router.get("/login", (req, res) => {
   const data = {

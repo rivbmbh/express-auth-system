@@ -4,13 +4,10 @@ import { findManyUser } from "../controllers/pageControllers.js";
 
 const authenticateToken = (req, res, next) => {
   // const authHeader = req.headers.authorization;
-  const accessToken = req.cookies.accessToken;
-  console.log("access token dari cookie " + accessToken);
+  const accessToken = req.cookies?.accessToken;
 
   if (!accessToken) {
-    return res.status(401).json({
-      message: "Token tidak ditemukan!",
-    });
+    return res.redirect("/refresh-token");
   }
 
   // const accessToken = token.split(" ")[1];
@@ -25,16 +22,13 @@ const authenticateToken = (req, res, next) => {
 
     req.user = decoded;
 
-    next();
+    return next(); //lanjut ke authorizeRole
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({
-        message: "Token sudah expired!",
-      });
+    if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+      return res.redirect("/refresh-token");
     }
-    return res.status(401).json({
-      message: "Token tidak valid!",
-    });
+    console.error(err);
+    return res.status(500).send("Internal server error");
   }
 };
 
@@ -63,75 +57,26 @@ const authorizeRole = (...allowedRoles) => {
 };
 
 const refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
-  console.log("refreshToken:  " + refreshToken);
+  const refreshToken = req.cookies?.refreshToken;
 
   if (!refreshToken) {
-    return res.status(401).json({
-      message: "Refresh token required!",
-    });
+    return res.redirect("/login");
   }
 
   const secretRefreshToken = process.env.REFRESH_TOKEN_SECRET;
   const secretAccessToken = process.env.ACCESS_TOKEN_SECRET;
-  console.log("berikutnya proses pemeriksaan refresh token...");
-
-  // jwt.verify(
-  //   refreshToken,
-  //   secretRefreshToken,
-  //   /**
-  //     1. err/error, jika bagian ini = true berarti refresh token tidak valid atau sudah expired, validasinya mirip seperti access
-  //         token yang mencocokan signaturenya jika valid maka selanjutnya mengecek waktu expirednya.
-  //     2. decoded, nah jika error = false atau refresh token valid maka decoded akan mengembalikan payload dari refresh token,
-  //         cth: {userID: '2'}
-  //    */
-  //   async (err, decoded) => {
-  //     if (err) {
-  //       // if (err.name === "TokenExpiredError") {
-  //       //   return res.status(403).json({
-  //       //     message: "expired refresh token",
-  //       //   });
-  //       // }
-  //       return res.status(403).json({
-  //         message: "Invalid refresh token or expired",
-  //       });
-  //     }
-
-  //     //cari user di database
-  //     console.log("userID" + decoded.userID);
-  //     const user = await findUser("id", decoded.userID);
-  //     // const user = await pool.query("SELECT * FROM users WHERE id = $1", [
-  //     //   decoded.userID,
-  //     // ]);
-  //     console.log("user data " + user.rows[0].username);
-  //     //jika token valid buat access token baru
-  //     const newAccessToken = jwt.sign(
-  //       {
-  //         userID: user.rows[0].id,
-  //         role: user.rows[0].role,
-  //       },
-  //       secretAccessToken,
-  //       {
-  //         expiresIn: "10m",
-  //       },
-  //     );
-  //     console.log("new access token " + newAccessToken);
-  //     res.json({
-  //       accessToken: newAccessToken,
-  //     });
-  //   },
-  // );
 
   try {
     const decoded = jwt.verify(refreshToken, secretRefreshToken);
-    console.log("userID " + decoded.userID);
 
     const user = (await findManyUser("id", decoded.userID)).rows[0];
-    console.log("user " + user.username);
 
     if (!user) {
-      throw new Error("user tidak ditemukan");
+      console.log("user tidak ditemukan");
+      return res.redirect("/login");
     }
+
+    console.log("user " + user.username);
 
     const newAccessToken = jwt.sign(
       {
@@ -141,24 +86,24 @@ const refreshToken = async (req, res) => {
       },
       secretAccessToken,
       {
-        expiresIn: "1h",
+        expiresIn: "1m",
       },
     );
 
-    console.log(newAccessToken);
-    res.json({
-      message: "success refresh token",
-      accessToken: newAccessToken,
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1 * 60 * 1000, //5menit
+      path: "/",
     });
+    console.log("refresh token berhasil dijalankan");
+    return res.redirect("/dasboard");
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return res.status(403).json({
-        message: "Token sudah expired!",
-      });
-    }
-    return res.status(403).json({
-      message: "Token tidak valid atau sudah expired!",
-    });
+    console.log(err.name, err.message);
+    res.clearCookie("accessToken", { path: "/" });
+    res.clearCookie("refreshToken", { path: "/" });
+    return res.redirect("/login");
   }
 };
 
