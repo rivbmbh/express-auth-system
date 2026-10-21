@@ -6,11 +6,7 @@ import {
   findManyUser,
   checkEmail,
 } from "../controllers/pageControllers.js";
-import {
-  authenticateToken,
-  authorizeRole,
-  refreshToken,
-} from "../middleware/auth.js";
+import { authenticateToken, authorizeRole } from "../middleware/auth.js";
 import argon2 from "argon2";
 import { body } from "express-validator";
 
@@ -119,15 +115,14 @@ router.post(
   login,
 );
 
-router.post("/refresh-token", refreshToken);
-router.get("/refresh-token", (req, res) => {
-  const data = {
-    title: "Refresh Token",
-    page: "refresh",
-  };
-  res.render("main", data);
-});
-router.get("/dashboard", authenticateToken, authorizeRole("admin"), dashboard);
+// router.post("/refresh-token", refreshToken);
+
+router.get(
+  "/dashboard",
+  authenticateToken,
+  authorizeRole("admin", "user"),
+  dashboard,
+);
 router.get("/login", (req, res) => {
   const data = {
     title: "Login Page",

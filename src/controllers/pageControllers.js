@@ -3,6 +3,12 @@ import pool from "../database/db_connect.js";
 import "dotenv/config";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import {
+  createAccessToken,
+  createRefreshToken,
+  setAccessCookie,
+  setRefreshCookie,
+} from "../middleware/auth.js";
 
 const dashboard = async (req, res) => {
   try {
@@ -40,8 +46,6 @@ const login = async (req, res) => {
 
   try {
     const user = req.loginUser[0];
-    console.log("id" + user.id);
-    console.log("role" + user.role);
     // const authHeader = req.headers.authorization;
     // console.log("authHeader:" + authHeader);
 
@@ -51,57 +55,24 @@ const login = async (req, res) => {
     //   });
     // }
 
-    /*
-     * sub/subject bisa diisi dengan id user
-     * role juga disesuaikan dari role user saat registrasi atau dari DB
-     */
-    const payload = {
-      userID: user.id,
-      role: user.role,
-      username: user.username,
-    };
-    console.log("payload" + payload);
-
-    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "1m",
-      algorithm: "HS256", //menentukan algoritma yang dipakai untuk membuat signature
-    });
-    console.log("access token:" + accessToken); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
+    const accessToken = createAccessToken(user); //menghasil random char terdiri dari header.payload.signature yang dipisahkan dengan tanda titik.
 
     //payload refresh token hanya userID karna nantinya ketika melakukan refresh sistem akan mencari user berdasarkan id-nya di database agar sumber informasi user valid bukan hanya mengambil payload dari access token lama yang belum tentu valid, karena misalnya role nya sudah berubah atau mungkin usernya sudah dihapus dari database
-    const refreshToken = jwt.sign(
-      {
-        userID: user.id,
-      },
-      process.env.REFRESH_TOKEN_SECRET,
-      {
-        expiresIn: "1d",
-      },
-    );
-
-    console.log("refresh token:" + refreshToken);
+    const refreshToken = createRefreshToken(user);
 
     //set cookie
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true, //mencegah js DOM mengambil cookie dari document.cookie
-      secure: process.env.NODE_ENV === "production", //jika true pakai https sebaliknya http
-      samSite: "lax",
-      maxAge: 1 * 60 * 1000, //1 * 60 * 1000, angka 1 di awal sebagai acuan atau = 1 menit
-      path: "/", //bisa diakses di endpoint apapun
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      samSite: "lax",
-      maxAge: 1 * 24 * 60 * 60 * 1000, //1hari * 24jam * 60menit * 60detik * 1000milidetik / dikonversi ke milidetik
-      path: "/refresh-token", //hanya bisa diakses dienpoint ini
-    });
+    setAccessCookie(res, accessToken);
+    setRefreshCookie(res, refreshToken);
 
     res.status(200).json({
       success: true,
       message: "Login berhasil dilakukan",
-      user,
+      //kenapa data user dikrim ? untuk memaksimalkan data diprofil user misalnya
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
       redirectTo: "/dashboard",
     });
   } catch (err) {
